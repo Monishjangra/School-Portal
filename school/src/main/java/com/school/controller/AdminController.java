@@ -27,10 +27,9 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins = "http://localhost:4200")
+// @CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/admin")
-//@CrossOrigin("*")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin("*")
 public class AdminController {
 
 	@Autowired
@@ -48,7 +47,7 @@ public class AdminController {
 	@Autowired
 	private JwtUtil jwtUtil;
 
-//Add User
+	// Add User
 	@PostMapping("/addUser")
 	public ResponseEntity<User> create(@RequestBody User user) throws Exception {
 		user.setRole("Admin");
@@ -57,49 +56,49 @@ public class AdminController {
 		return ResponseEntity.ok(userRepository.save(user));
 	}
 
-//Show All User	
+	// Show All User
 	@GetMapping("/getAll")
-	public List<User> getAllUser(HttpServletRequest request, 
-	        HttpServletResponse response) {
-		String token=request.getHeader("Authorization");
-		System.out.println("I am in get all " +token);
+	public List<User> getAllUser(HttpServletRequest request,
+			HttpServletResponse response) {
+		String token = request.getHeader("Authorization");
+		System.out.println("I am in get all " + token);
 		return userRepository.findAll();
 	}
 
-//delete Admin
+	// delete Admin
 	@DeleteMapping("/delete/{email}")
-	public ResponseEntity<String> deleteStudent(@PathVariable String email,Principal principal) {
+	public ResponseEntity<String> deleteStudent(@PathVariable String email, Principal principal) {
 		User loginUser = userRepository.findByEmail(principal.getName());
-		if(loginUser.getRole().equals("Admin")) {
-		userRepository.deleteByEmail(email);
-		return ResponseEntity.ok("Admin deleted !!");
-		}
-		else {
+		if (loginUser.getRole().equals("Admin")) {
+			userRepository.deleteByEmail(email);
+			return ResponseEntity.ok("Admin deleted !!");
+		} else {
 			return ResponseEntity.ok("Not accessible");
 		}
 	}
 
-//update User
+	// update User
 	@PutMapping("/update/{email}")
-	public ResponseEntity<?> updateUserDetails(@RequestBody User user, @PathVariable String email,Principal principal) {
+	public ResponseEntity<?> updateUserDetails(@RequestBody User user, @PathVariable String email,
+			Principal principal) {
 		User dbuser = userRepository.findByEmail(email);
-		User loginUser =userRepository.findByEmail(principal.getName());
-		if(loginUser.getRole().equals("Admin")) {
-		dbuser.setFirstName(user.getFirstName());
-		dbuser.setLastName(user.getLastName());
-		dbuser.setEmail(user.getEmail());
-		dbuser.setPhoneNo(user.getPhoneNo());
-		dbuser.setStandard(user.getStandard());
-		dbuser.setSection(user.getSection());
-		dbuser.setPassword(passwordEncoder.encode(user.getPassword()));
-		userRepository.save(dbuser);
-		return ResponseEntity.ok(dbuser);
-		}else {
+		User loginUser = userRepository.findByEmail(principal.getName());
+		if (loginUser.getRole().equals("Admin")) {
+			dbuser.setFirstName(user.getFirstName());
+			dbuser.setLastName(user.getLastName());
+			dbuser.setEmail(user.getEmail());
+			dbuser.setPhoneNo(user.getPhoneNo());
+			dbuser.setStandard(user.getStandard());
+			dbuser.setSection(user.getSection());
+			dbuser.setPassword(passwordEncoder.encode(user.getPassword()));
+			userRepository.save(dbuser);
+			return ResponseEntity.ok(dbuser);
+		} else {
 			return ResponseEntity.ok("not accessible");
 		}
 	}
 
-//login user
+	// login user
 	@PostMapping("/login")
 	public ResponseEntity<JwtResponse> generateToken(@RequestBody JwtRequest request) throws Exception {
 		try {
@@ -110,7 +109,7 @@ public class AdminController {
 		}
 		UserDetails user = userDetailService.loadUserByUsername(request.getEmail());
 		String token = jwtUtil.generateToken(user.getUsername());
-//		System.out.println(token);
+		// System.out.println(token);
 		return ResponseEntity.ok(new JwtResponse(token));
 	}
 
@@ -135,26 +134,21 @@ public class AdminController {
 		User user = (User) userDetailService.loadUserByUsername(principal.getName());
 		return user.getAuthorities();
 	}
-	
 
-//admin detail
+	// admin detail
 	@GetMapping("/")
 	public User detail(Principal principal) {
 		return (User) userDetailService.loadUserByUsername(principal.getName());
 	}
 
-
-
 	@GetMapping("/emails")
-	public List<String> sendEmails(@RequestParam String standard, @RequestParam(required = false) String section){
-	if(standard!=null && section!=null){
-		return userRepository.findEmailByStandardAndSection(standard,section);
-	}
-	else if(section == null){
-		return userRepository.findEmailByStandard(standard);
-	}
-	else{
-		return null;
-	}
+	public List<String> sendEmails(@RequestParam String standard, @RequestParam(required = false) String section) {
+		if (standard != null && section != null) {
+			return userRepository.findEmailByStandardAndSection(standard, section);
+		} else if (section == null) {
+			return userRepository.findEmailByStandard(standard);
+		} else {
+			return null;
+		}
 	}
 }
